@@ -41,7 +41,7 @@ private final String tokenID;
     //sends message to bot returns message object of telegram
     private void sendUserAgent(Integer chatID) throws MalformedURLException, IOException
     {
-        String OS=this.userName+" is using "+System.getProperty("os.name");
+        String OS = this.userName+" is using "+System.getProperty("os.name");
         String URLtoHit=url+tokenID+"/sendMessage?chat_id="+chatID+"&text="+OS;
         URL u=new URL(URLtoHit);
         HttpURLConnection conn=(HttpURLConnection) u.openConnection();
